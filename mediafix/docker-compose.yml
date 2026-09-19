@@ -1,0 +1,21 @@
+services:
+  mediafix:
+    build: .
+    container_name: mediafix
+    restart: unless-stopped
+    ports:
+      - "5225:5225"
+    volumes:
+      - ./data:/data
+      - ./app:/app/app
+    environment:
+      - TZ=Asia/Shanghai
+      # 默认管理员账号 / 密码（首次部署后请立即修改）
+      - MEDIAFIX_ADMIN_USER=chenchengcheng666
+      - MEDIAFIX_INIT_PWD=chenchengcheng666
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5225/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

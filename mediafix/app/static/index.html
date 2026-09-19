@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#5B8FF9">
+<title>MediaFix · 影视刮削管理后台</title>
+<link rel="stylesheet" href="/static/style.css?v=63">
+</head>
+<body>
+
+<!-- ==================== 登录 / 注册页 ==================== -->
+<div id="auth-view" class="view view-active">
+  <div class="auth-wrap">
+    <div class="auth-card card-press">
+      <div class="auth-logo">
+        <svg viewBox="0 0 64 64" width="56" height="56" fill="none">
+          <circle cx="32" cy="32" r="30" stroke="url(#g1)" stroke-width="2.5"/>
+          <path d="M20 40c4-12 10-18 24-20-6 4-10 10-12 18 6-2 10-2 14 2-8 0-12 2-16 6" stroke="url(#g1)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="64" y2="64">
+              <stop offset="0%" stop-color="#5B8FF9"/>
+              <stop offset="100%" stop-color="#8E7CC3"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <h1 class="auth-title">MediaFix</h1>
+      <p class="auth-sub">影视资源智能重命名与自动归类</p>
+
+      <form id="auth-form" class="auth-form" autocomplete="off">
+        <div class="field">
+          <label class="field-label">用户名</label>
+          <input id="auth-username" class="input" type="text" placeholder="请输入用户名" required>
+        </div>
+        <div class="field">
+          <label class="field-label">密码</label>
+          <input id="auth-password" class="input" type="password" placeholder="请输入密码" required>
+        </div>
+        <div class="field auth-invite-field" style="display:none;">
+          <label class="field-label">邀请码</label>
+          <input id="auth-invite" class="input" type="text" placeholder="请输入邀请码">
+        </div>
+
+        <div id="auth-error" class="auth-error" style="display:none;"></div>
+
+        <button id="auth-submit" class="btn btn-primary btn-press" type="submit">登录</button>
+        <div class="auth-switch">
+          <a id="auth-switch-btn" href="javascript:;">没有账号？使用邀请码注册</a>
+        </div>
+      </form>
+    </div>
+    <div class="auth-footer">
+      <div class="auth-footer-line">MediaFix · 私有部署版</div>
+      <div class="auth-footer-line auth-footer-line-sub">Made with ❤ by 陈橙呈 · 仅供学习交流，禁止商用</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 主应用 ==================== -->
+<div id="main-app" class="view">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div id="topbar-avatar" class="avatar avatar-clickable" title="点击编辑个人资料">
+        <img id="topbar-avatar-img" alt="" style="display:none;">
+        <span id="topbar-avatar-text">M</span>
+      </div>
+      <div class="topbar-info">
+        <div id="topbar-nickname" class="topbar-nickname">加载中…</div>
+        <div id="topbar-username" class="topbar-sub">@user</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span id="topbar-role" class="badge">normal</span>
+      <button id="btn-settings" class="icon-btn icon-btn-press" title="设置" style="display:none;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+      <button id="btn-logout" class="btn btn-ghost btn-press">退出</button>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <section class="stats-row">
+      <div id="card-ai" class="stat-card card-press">
+        <div class="stat-card-head">
+          <div class="stat-card-icon stat-card-icon-blue">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="stat-card-title">
+            <div id="ai-name" class="stat-card-name">AI 未配置</div>
+            <div id="ai-model" class="stat-card-sub">请到设置中配置</div>
+          </div>
+        </div>
+        <div class="stat-card-body">
+          <div id="ai-balance" class="stat-card-value">--</div>
+          <div class="stat-card-label">余额</div>
+        </div>
+        <button id="btn-ai-manage" class="stat-card-action btn-press">管理</button>
+      </div>
+
+      <div class="stat-card card-press">
+        <div class="stat-card-head">
+          <div class="stat-card-icon stat-card-icon-purple">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 7l9-4 9 4-9 4-9-4z"/>
+              <path d="M3 12l9 4 9-4"/>
+              <path d="M3 17l9 4 9-4"/>
+            </svg>
+          </div>
+          <div class="stat-card-title">
+            <div class="stat-card-name">累计成功整理</div>
+            <div class="stat-card-sub">自部署以来的总计</div>
+          </div>
+        </div>
+        <div class="stat-card-body">
+          <div id="stat-total" class="stat-card-value">0</div>
+          <div class="stat-card-label">个文件</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="entry-row">
+      <div id="card-auto-entry" class="entry-card card-press" data-open-auto>
+        <div class="entry-left">
+          <div class="entry-icon entry-icon-auto">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="9"/>
+              <path d="M12 7v5l3 2"/>
+            </svg>
+          </div>
+          <div class="entry-text">
+            <div class="entry-title">自动定时任务</div>
+            <div class="entry-sub">按间隔或每日定点，自动扫描 · 解析 · 归档</div>
+          </div>
+        </div>
+        <div class="entry-arrow">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </div>
+      </div>
+
+      <div id="card-rename-entry" class="entry-card card-press" data-open-rename-tasks>
+        <div class="entry-left">
+          <div class="entry-icon entry-icon-rename">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M4 6h16"/>
+              <path d="M4 12h10"/>
+              <path d="M4 18h16"/>
+              <circle cx="18" cy="12" r="2"/>
+            </svg>
+          </div>
+          <div class="entry-text">
+            <div class="entry-title">重命名任务</div>
+            <div class="entry-sub">查看历史任务，实时追踪进行中的整理进度</div>
+          </div>
+        </div>
+        <div class="entry-arrow">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </div>
+      </div>
+
+      <div id="card-drive-entry" class="entry-card card-press" data-open-drives>
+        <div class="entry-left">
+          <div class="entry-icon entry-icon-drive">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M18 10h-1.3A6 6 0 1 0 5.5 12.4"/>
+              <path d="M2 15h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z"/>
+              <circle cx="17" cy="18" r="1"/>
+            </svg>
+          </div>
+          <div class="entry-text">
+            <div class="entry-title">网盘管理</div>
+            <div class="entry-sub">配置 123云盘、WebDAV 等存储</div>
+          </div>
+        </div>
+        <div class="entry-arrow">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 6l6 6-6 6"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <aside class="side-col">
+        <div class="panel card-press">
+          <div class="panel-head">
+            <h2 class="panel-title">📁 我的网盘</h2>
+            <button id="btn-add-source" class="btn btn-text btn-press">+ 添加</button>
+          </div>
+          <div id="source-list" class="source-list">
+            <div class="empty-hint">还没有网盘，点右上角添加</div>
+          </div>
+        </div>
+
+        <div id="panel-browser" class="panel card-press" style="display:none;">
+          <div class="panel-head">
+            <h2 class="panel-title">📂 目录浏览</h2>
+            <button id="btn-browser-up" class="btn btn-text btn-press">↑ 上级</button>
+          </div>
+          <div class="path-bar">
+            <span id="browser-path" class="path-text ellipsis" title="">/</span>
+          </div>
+          <div id="browser-list" class="browser-list">
+            <div class="empty-hint">选择一个网盘开始</div>
+          </div>
+          <button id="btn-scan" class="btn btn-primary btn-press btn-block" style="margin-top:12px;">
+            递归扫描目录视频
+          </button>
+        </div>
+      </aside>
+
+      <div class="content-col">
+        <div class="panel card-press">
+          <div class="panel-head">
+            <h2 class="panel-title">📋 待整理视频</h2>
+            <div class="panel-tools">
+              <span id="quota-badge" class="badge badge-soft">今日额度 0/0</span>
+            </div>
+          </div>
+
+          <div id="scan-progress" class="progress-box" style="display:none;">
+            <div class="progress-bar"><div id="scan-progress-fill" class="progress-fill"></div></div>
+            <div id="scan-progress-text" class="progress-text">扫描中…</div>
+          </div>
+
+          <div class="toolbar">
+            <label class="checkbox-line">
+              <input id="check-all" type="checkbox">
+              <span>全选</span>
+            </label>
+            <button id="btn-invert" class="btn btn-text btn-press">反选</button>
+            <span class="spacer"></span>
+            <button id="btn-clear-list" class="btn btn-text btn-press">清空列表</button>
+            <button id="btn-rename" class="btn btn-primary btn-press">执行重命名</button>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table" id="video-table">
+              <thead>
+                <tr>
+                  <th style="width:36px;"></th>
+                  <th>原文件名</th>
+                  <th>标准名预览</th>
+                  <th style="width:80px;">状态</th>
+                </tr>
+              </thead>
+              <tbody id="video-tbody">
+                <tr><td colspan="4"><div class="empty-hint">还没有扫描任何文件</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel card-press">
+          <div class="panel-head">
+            <h2 class="panel-title">📜 操作历史</h2>
+            <button id="btn-history-all" class="btn btn-text btn-press">查看全部</button>
+          </div>
+          <div id="history-list" class="history-list">
+            <div class="empty-hint">暂无操作记录</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ==================== 重命名任务模块 ==================== -->
+<div id="rename-module" class="view">
+
+  <section id="rename-list-view" class="rename-page rename-page-active">
+    <header class="topbar topbar-sub-page">
+      <div class="topbar-left">
+        <button id="btn-rename-back" class="icon-btn icon-btn-press" title="返回">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="topbar-info">
+          <div class="topbar-nickname">重命名任务</div>
+          <div class="topbar-sub">历史记录与实时进度</div>
+        </div>
+      </div>
+      <button id="btn-rename-refresh" class="icon-btn icon-btn-press" title="刷新">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M21 12a9 9 0 1 1-3-6.7"/>
+          <path d="M21 4v5h-5"/>
+        </svg>
+      </button>
+    </header>
+    <main class="main-wrap">
+      <div id="rename-list" class="rename-list">
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-text">暂无重命名任务</div>
+          <div class="empty-state-hint">在主界面扫描视频并执行重命名后，任务会出现在这里</div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <section id="rename-detail-view" class="rename-page">
+    <header class="topbar topbar-sub-page">
+      <div class="topbar-left">
+        <button id="btn-rename-detail-back" class="icon-btn icon-btn-press" title="返回">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="topbar-info">
+          <div class="topbar-nickname">任务详情</div>
+          <div id="rename-detail-sub" class="topbar-sub"></div>
+        </div>
+      </div>
+      <button id="btn-rename-detail-cancel" class="btn btn-warn btn-press" style="display:none;">中断任务</button>
+    </header>
+    <main class="main-wrap">
+      <div class="panel card-press">
+        <div class="rename-progress-head">
+          <div class="rename-progress-label">
+            <span id="rename-progress-label">已完成 0 / 0</span>
+          </div>
+          <div class="progress-bar">
+            <div id="rename-progress-fill" class="progress-fill"></div>
+          </div>
+          <div id="rename-progress-current" class="progress-text">等待中…</div>
+        </div>
+        <div class="rename-stats-row">
+          <div class="rename-stat">
+            <div class="rename-stat-num ok" id="rename-stat-success">0</div>
+            <div class="rename-stat-label">成功</div>
+          </div>
+          <div class="rename-stat">
+            <div class="rename-stat-num bad" id="rename-stat-failed">0</div>
+            <div class="rename-stat-label">失败</div>
+          </div>
+          <div class="rename-stat">
+            <div class="rename-stat-num" id="rename-stat-total">0</div>
+            <div class="rename-stat-label">总数</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel card-press">
+        <div class="panel-head">
+          <h2 class="panel-title">文件清单</h2>
+          <div class="panel-tools">
+            <button class="btn btn-text btn-press" data-filter="all">全部</button>
+            <button class="btn btn-text btn-press" data-filter="success">成功</button>
+            <button class="btn btn-text btn-press" data-filter="fail">失败</button>
+          </div>
+        </div>
+        <div id="rename-files" class="rename-files"></div>
+      </div>
+    </main>
+  </section>
+</div>
+
+<!-- ==================== 网盘管理模块 ==================== -->
+<div id="drives-module" class="view">
+
+  <section id="drives-list-view" class="drives-page drives-page-active">
+    <header class="topbar topbar-sub-page">
+      <div class="topbar-left">
+        <button id="btn-drives-back" class="icon-btn icon-btn-press" title="返回">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="topbar-info">
+          <div class="topbar-nickname">网盘管理</div>
+          <div class="topbar-sub">配置与管理存储服务</div>
+        </div>
+      </div>
+    </header>
+    <main class="main-wrap">
+      <div class="drive-list">
+
+        <div class="drive-item card-press" data-drive="pan123">
+          <div class="drive-item-icon drive-icon-pan123">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M18 10h-1.3A6 6 0 1 0 5.5 12.4"/>
+              <path d="M2 15h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z"/>
+            </svg>
+          </div>
+          <div class="drive-item-main">
+            <div class="drive-item-title">123 云盘</div>
+            <div class="drive-item-sub" id="drive-pan123-sub">检查中…</div>
+          </div>
+          <div class="drive-item-arrow">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 6l6 6-6 6"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="drive-item card-press" data-drive="webdav">
+          <div class="drive-item-icon drive-icon-webdav">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="2" y="3" width="20" height="6" rx="2"/>
+              <rect x="2" y="15" width="20" height="6" rx="2"/>
+              <line x1="6" y1="6" x2="6.01" y2="6"/>
+              <line x1="6" y1="18" x2="6.01" y2="18"/>
+            </svg>
+          </div>
+          <div class="drive-item-main">
+            <div class="drive-item-title">WebDAV</div>
+            <div class="drive-item-sub" id="drive-webdav-sub">配置中…</div>
+          </div>
+          <div class="drive-item-arrow">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 6l6 6-6 6"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="drive-item drive-item-disabled">
+          <div class="drive-item-icon drive-icon-muted">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M18 10h-1.3A6 6 0 1 0 5.5 12.4"/>
+              <path d="M2 15h18a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2z"/>
+            </svg>
+          </div>
+          <div class="drive-item-main">
+            <div class="drive-item-title">115 云盘</div>
+            <div class="drive-item-sub">即将支持</div>
+          </div>
+          <span class="drive-item-badge">Soon</span>
+        </div>
+
+      </div>
+    </main>
+  </section>
+
+  <section id="drive-pan123-view" class="drives-page">
+    <header class="topbar topbar-sub-page">
+      <div class="topbar-left">
+        <button id="btn-drive-pan123-back" class="icon-btn icon-btn-press" title="返回">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="topbar-info">
+          <div class="topbar-nickname">123 云盘</div>
+          <div class="topbar-sub">OpenAPI 直连</div>
+        </div>
+      </div>
+    </header>
+    <main class="main-wrap">
+      <div id="pan123-accounts-list" class="pan123-accounts-list">
+        <div class="empty-hint">加载中…</div>
+      </div>
+      <button id="btn-pan123-start-auth" class="btn btn-primary btn-press btn-block" style="margin-top:16px;">
+        + 添加新账号
+      </button>
+    </main>
+  </section>
+
+</div>
+
+<!-- ==================== 设置页 ==================== -->
+<div id="settings-view" class="view">
+  <header class="topbar topbar-sub-page">
+    <div class="topbar-left">
+      <button id="btn-settings-back" class="icon-btn icon-btn-press" title="返回">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <div class="topbar-info">
+        <div class="topbar-nickname">设置</div>
+        <div class="topbar-sub">系统管理</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <section class="panel card-press" id="settings-panel-api">
+      <div class="panel-head">
+        <h2 class="panel-title">🔌 AI API 配置</h2>
+        <button id="btn-api-add" class="btn btn-text btn-press">+ 添加 API</button>
+      </div>
+      <div id="api-list" class="api-list">
+        <div class="empty-hint">还没有配置任何 API</div>
+      </div>
+    </section>
+
+    <section class="panel card-press" id="settings-panel-users">
+      <div class="panel-head">
+        <h2 class="panel-title">👥 用户管理</h2>
+        <span id="users-count" class="badge badge-soft">0 位用户</span>
+      </div>
+      <div id="users-list" class="users-list">
+        <div class="empty-hint">加载中…</div>
+      </div>
+    </section>
+
+    <section class="panel card-press" id="settings-panel-invites">
+      <div class="panel-head">
+        <h2 class="panel-title">🎟️ 邀请码生成</h2>
+      </div>
+      <div class="invite-form">
+        <select id="invite-role" class="input">
+          <option value="normal">普通用户 normal</option>
+          <option value="member">会员 member</option>
+        </select>
+        <select id="invite-expire" class="input">
+          <option value="24">有效期 24 小时</option>
+          <option value="168" selected>有效期 7 天</option>
+          <option value="0">永久有效</option>
+        </select>
+        <button id="btn-invite-create" class="btn btn-primary btn-press">生成</button>
+      </div>
+      <div id="invites-list" class="invites-list">
+        <div class="empty-hint">暂无邀请码</div>
+      </div>
+    </section>
+
+    <section class="panel card-press" id="settings-panel-system">
+      <div class="panel-head">
+        <h2 class="panel-title">🔧 系统维护</h2>
+      </div>
+      <div class="maintain-btns">
+        <button id="btn-clear-cache" class="btn btn-ghost btn-press">清理 AI 缓存</button>
+        <button id="btn-clear-history" class="btn btn-ghost btn-press">清空操作历史</button>
+        <button id="btn-view-stats" class="btn btn-ghost btn-press">查看系统统计</button>
+      </div>
+      <div id="system-stats" class="stats-mini" style="display:none;"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ==================== 自动任务模块 ==================== -->
+<div id="auto-module" class="view">
+
+  <section id="auto-list-view" class="auto-page auto-page-active">
+    <header class="topbar topbar-sub-page">
+      <div class="topbar-left">
+        <button id="btn-auto-back" class="icon-btn icon-btn-press" title="返回">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="topbar-info">
+          <div class="topbar-nickname">自动定时任务</div>
+          <div class="topbar-sub">按间隔或每日定时自动整理</div>
+        </div>
+      </div>
+      <button id="btn-auto-new" class="btn btn-primary btn-press">+ 新建</button>
+    </header>
+    <main class="main-wrap">
+      <div id="auto-list" class="auto-list">
+        <div class="empty-state">
+          <div class="empty-state-icon">⏰</div>
+          <div class="empty-state-text">暂无定时任务</div>
+          <div class="empty-state-hint">点击右上角"新建"创建第一个自动任务</div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <section id="auto-detail-view" class="auto-page">
+    <header class="topbar topbar-sub-page">
+      <div class="topbar-left">
+        <button id="btn-detail-back" class="icon-btn icon-btn-press" title="返回">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="topbar-info">
+          <div class="topbar-nickname">任务详情</div>
+          <div id="detail-sub" class="topbar-sub"></div>
+        </div>
+      </div>
+    </header>
+    <main class="main-wrap">
+      <div class="panel card-press">
+        <div class="detail-info-grid" id="detail-info"></div>
+      </div>
+      <div class="panel card-press">
+        <div class="panel-head"><h2 class="panel-title">快捷操作</h2></div>
+        <div class="detail-actions">
+          <button id="btn-detail-edit" class="btn btn-ghost btn-press">编辑任务</button>
+          <button id="btn-detail-run" class="btn btn-primary btn-press">立即执行</button>
+          <button id="btn-detail-cancel" class="btn btn-warn btn-press" style="display:none;">中断当前任务</button>
+          <button id="btn-detail-toggle" class="btn btn-ghost btn-press">启用 / 禁用</button>
+          <button id="btn-detail-delete" class="btn btn-danger btn-press">删除任务</button>
+        </div>
+      </div>
+      <div class="panel card-press">
+        <div class="panel-head">
+          <h2 class="panel-title">执行历史</h2>
+          <button id="btn-detail-logs-all" class="btn btn-text btn-press">全部记录</button>
+        </div>
+        <div id="detail-logs" class="logs-list">
+          <div class="empty-hint">暂无执行记录</div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <section id="auto-form-view" class="auto-page">
+    <header class="topbar topbar-sub-page">
+      <div class="topbar-left">
+        <button id="btn-form-back" class="icon-btn icon-btn-press" title="返回">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <div class="topbar-info">
+          <div class="topbar-nickname" id="form-title">新建任务</div>
+          <div class="topbar-sub">配置自动执行规则</div>
+        </div>
+      </div>
+    </header>
+    <main class="main-wrap main-wrap-form">
+      <form id="auto-form" class="auto-form" onsubmit="return false;">
+
+        <div class="panel card-press">
+          <div class="panel-head"><h2 class="panel-title">基础信息</h2></div>
+          <div class="field">
+            <label class="field-label">任务名称</label>
+            <input id="form-name" class="input" type="text" placeholder="如：欧美电影自动入库" maxlength="30" required>
+          </div>
+          <div class="field">
+            <label class="field-label">网盘</label>
+            <select id="form-source" class="input" required></select>
+          </div>
+        </div>
+
+        <div class="panel card-press">
+          <div class="panel-head"><h2 class="panel-title">文件夹配置</h2></div>
+          <div class="field">
+            <label class="field-label">待处理文件夹</label>
+            <div class="field-row">
+              <input id="form-source-path" class="input" type="text" placeholder="/待处理" required>
+              <button type="button" class="btn btn-ghost btn-press" data-picker="form-source-path">选择</button>
+            </div>
+            <div class="field-hint" style="margin-top:8px;color:var(--c-text-mute);font-size:12px;line-height:1.6;">
+              💡 非影视资源（含网址/广告/片头尾 OP/ED/PV 等）会自动移到源目录下的 <code>_trash/</code> 文件夹
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">成品库文件夹</label>
+            <div class="field-row">
+              <input id="form-target-path" class="input" type="text" placeholder="/成品影视库" required>
+              <button type="button" class="btn btn-ghost btn-press" data-picker="form-target-path">选择</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel card-press">
+          <div class="panel-head"><h2 class="panel-title">定时规则</h2></div>
+          <div class="field">
+            <label class="field-label">模式</label>
+            <div class="radio-group">
+              <label class="radio-item">
+                <input type="radio" name="form-mode" value="interval" checked>
+                <span>间隔循环</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="form-mode" value="daily">
+                <span>每日定点</span>
+              </label>
+            </div>
+          </div>
+          <div class="field" id="field-interval">
+            <label class="field-label">执行间隔（小时）</label>
+            <input id="form-interval" class="input" type="number" min="0.1" max="24" step="0.1" value="1">
+          </div>
+          <div class="field" id="field-daily" style="display:none;">
+            <label class="field-label">每日执行时间</label>
+            <input id="form-daily-time" class="input" type="time" value="03:00">
+          </div>
+        </div>
+
+        <div class="panel card-press">
+          <div class="panel-head"><h2 class="panel-title">执行限制</h2></div>
+          <div class="field">
+            <label class="field-label">单次处理上限（个）<span id="form-max-hint" class="field-hint">当前 300</span></label>
+            <input id="form-max" class="input" type="range" min="50" max="500" step="10" value="300">
+          </div>
+        </div>
+
+      </form>
+    </main>
+    <div class="form-bottom-bar">
+      <button id="btn-form-cancel" class="btn btn-ghost btn-press">取消</button>
+      <button id="btn-form-save" class="btn btn-primary btn-press">保存配置</button>
+    </div>
+  </section>
+</div>
+
+<!-- ==================== 弹窗汇总 ==================== -->
+
+<div id="profile-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h3 class="modal-title">编辑个人资料</h3>
+      <button class="modal-close modal-close-press" data-close="profile-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label">头像</label>
+        <div class="avatar-upload">
+          <div id="profile-avatar-preview" class="avatar avatar-lg"><span>M</span></div>
+          <label class="btn btn-ghost btn-press">
+            选择图片
+            <input id="profile-avatar-input" type="file" accept="image/*" style="display:none;">
+          </label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">昵称</label>
+        <input id="profile-nickname" class="input" type="text" maxlength="20">
+      </div>
+      <div class="field">
+        <label class="field-label">修改密码（可选）</label>
+        <input id="profile-old-pwd" class="input" type="password" placeholder="原密码">
+        <input id="profile-new-pwd" class="input" type="password" placeholder="新密码" style="margin-top:8px;">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-press" data-close="profile-modal">取消</button>
+      <button id="btn-profile-save" class="btn btn-primary btn-press">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="api-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-lg">
+    <div class="modal-head">
+      <h3 class="modal-title">AI API 管理</h3>
+      <button class="modal-close modal-close-press" data-close="api-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="api-modal-list" class="api-list"></div>
+    </div>
+    <div class="modal-foot">
+      <button id="btn-api-modal-add" class="btn btn-primary btn-press btn-block">+ 添加新 API</button>
+    </div>
+  </div>
+</div>
+
+<div id="api-form-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h3 class="modal-title" id="api-form-title">添加 API</h3>
+      <button class="modal-close modal-close-press" data-close="api-form-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label">名称</label>
+        <input id="api-form-name" class="input" type="text" placeholder="如：DeepSeek 官方">
+      </div>
+      <div class="field">
+        <label class="field-label">供应商</label>
+        <select id="api-form-provider" class="input"></select>
+      </div>
+      <div class="field">
+        <label class="field-label">API Key</label>
+        <input id="api-form-key" class="input" type="text" placeholder="sk-…">
+      </div>
+      <div class="field">
+        <label class="field-label">模型名</label>
+        <input id="api-form-model" class="input" type="text" placeholder="deepseek-chat">
+      </div>
+      <div class="field" id="field-custom-url" style="display:none;">
+        <label class="field-label">自定义 Base URL</label>
+        <input id="api-form-custom-url" class="input" type="text" placeholder="https://...">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button id="btn-api-form-test" class="btn btn-ghost btn-press">测试连接</button>
+      <button class="btn btn-ghost btn-press" data-close="api-form-modal">取消</button>
+      <button id="btn-api-form-save" class="btn btn-primary btn-press">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="source-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h3 class="modal-title" id="source-modal-title">添加网盘</h3>
+      <button class="modal-close modal-close-press" data-close="source-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label">名称</label>
+        <input id="source-name" class="input" type="text" placeholder="如：123云盘">
+      </div>
+      <div class="field">
+        <label class="field-label">WebDAV URL</label>
+        <input id="source-url" class="input" type="text" placeholder="http://172.17.0.1:5244/dav">
+      </div>
+      <div class="field">
+        <label class="field-label">用户名</label>
+        <input id="source-username" class="input" type="text">
+      </div>
+      <div class="field">
+        <label class="field-label">密码</label>
+        <input id="source-password" class="input" type="password">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-press" data-close="source-modal">取消</button>
+      <button id="btn-source-test" class="btn btn-ghost btn-press">测试连接</button>
+      <button id="btn-source-save" class="btn btn-primary btn-press">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="folder-picker-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-lg">
+    <div class="modal-head">
+      <h3 class="modal-title">选择文件夹</h3>
+      <button class="modal-close modal-close-press" data-close="folder-picker-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="path-bar">
+        <span id="picker-path" class="path-text ellipsis">/</span>
+      </div>
+      <div id="picker-list" class="browser-list"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-press" data-close="folder-picker-modal">取消</button>
+      <button id="btn-picker-confirm" class="btn btn-primary btn-press">使用当前目录</button>
+    </div>
+  </div>
+</div>
+
+<div id="pan123-auth-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-lg">
+    <div class="modal-head">
+      <h3 class="modal-title">授权 123 云盘</h3>
+      <button class="modal-close modal-close-press" data-close="pan123-auth-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-guide">
+        <b>第 1 步：</b>点击下方按钮，在打开的页面里登录你的 123 云盘账号并同意授权<br>
+        <b>第 2 步：</b>授权成功后，页面会显示两段字符串<br>
+        <b>第 3 步：</b>把它们分别粘贴到下面的输入框里即可
+      </div>
+
+      <button id="btn-open-pan123-auth" class="btn btn-primary btn-press btn-block" style="margin-bottom:18px;">
+        打开 123 授权页面
+      </button>
+
+      <div class="field">
+        <label class="field-label">账号名称（可选，便于区分多个账号）</label>
+        <input id="pan123-account-name" class="input" type="text" placeholder="如：主账号 / 小号">
+      </div>
+      <div class="field">
+        <label class="field-label">Access Token（访问令牌）</label>
+        <textarea id="pan123-access-token" class="input" rows="2" placeholder="粘贴页面里的 Access Token"></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Refresh Token（刷新令牌）</label>
+        <textarea id="pan123-refresh-token" class="input" rows="2" placeholder="粘贴页面里的 Refresh Token"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-press" data-close="pan123-auth-modal">取消</button>
+      <button id="btn-pan123-submit" class="btn btn-primary btn-press">完成授权</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirm-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-sm">
+    <div class="modal-head">
+      <h3 class="modal-title" id="confirm-title">请确认</h3>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-text" class="confirm-text">确定要执行该操作吗？</p>
+    </div>
+    <div class="modal-foot">
+      <button id="confirm-cancel" class="btn btn-ghost btn-press">取消</button>
+      <button id="confirm-ok" class="btn btn-primary btn-press">确定</button>
+    </div>
+  </div>
+</div>
+
+<div id="permission-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-sm">
+    <div class="modal-head">
+      <h3 class="modal-title">权限不足</h3>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-text">自动定时任务为会员专属功能，请开通会员后使用。</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary btn-press btn-block" data-close="permission-modal">我知道了</button>
+    </div>
+  </div>
+</div>
+
+<div id="history-full-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-lg">
+    <div class="modal-head">
+      <h3 class="modal-title">全部操作历史</h3>
+      <button class="modal-close modal-close-press" data-close="history-full-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="history-full-list" class="history-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="auto-log-detail-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-lg">
+    <div class="modal-head">
+      <h3 class="modal-title">执行详情</h3>
+      <button class="modal-close modal-close-press" data-close="auto-log-detail-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="log-detail-content"></div>
+    </div>
+  </div>
+</div>
+
+<div id="auto-logs-full-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-lg">
+    <div class="modal-head">
+      <h3 class="modal-title">全部执行记录</h3>
+      <button class="modal-close modal-close-press" data-close="auto-logs-full-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="logs-full-list" class="logs-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="stats-modal" class="modal">
+  <div class="modal-mask"></div>
+  <div class="modal-panel modal-panel-sm">
+    <div class="modal-head">
+      <h3 class="modal-title">系统统计</h3>
+      <button class="modal-close modal-close-press" data-close="stats-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="stats-modal-content" class="stats-mini"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 全局组件 ==================== -->
+<div id="toast" class="toast"></div>
+<div id="loading-overlay" class="loading-overlay" style="display:none;">
+  <div class="loading-spinner"></div>
+  <div id="loading-text" class="loading-text">处理中…</div>
+</div>
+
+<script src="/static/fx.js?v=12"></script>
+<script src="/static/app.js?v=63"></script>
+</body>
+</html>
